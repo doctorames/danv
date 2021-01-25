@@ -1,0 +1,7 @@
+
+.vscode/
+.vs/
+Debug/
+x64/
+driver/Debug/
+driver/x64/
