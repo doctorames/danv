@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="arch.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="FieldEncoding.h" />
     <ClInclude Include="vmx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

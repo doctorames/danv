@@ -1,10 +1,10 @@
 #include <ntddk.h>
 //#include <basetsd.h>
-//#include <intrin.h>
 
 #include "defs.h"
 #include "arch.h"
 #include "vmx.h"
+#include "FieldEncoding.h"
 
 #include <stdarg.h>
 
