@@ -90,7 +90,11 @@ union __cpuid_t {
 	} regs;
 };
 
+#pragma warning(push)
+#pragma warning(disable: 4214)
+
 // 0xc0000080
+#define IA32_EFER_MSR  0xc0000080
 union __ia32_efer_msr {
 	unsigned __int64 control;
 	struct {
@@ -105,6 +109,7 @@ union __ia32_efer_msr {
 };
 
 // 0x3a
+#define IA32_FEATURE_CONTROL_MSR  0x3a
 union __ia32_feature_control_msr {
 	unsigned __int64 control;
 	struct {
@@ -124,6 +129,7 @@ union __ia32_feature_control_msr {
 };
 
 // 0x485
+#define IA32_VMX_MISC_MSR  0x485
 union __ia32_vmx_misc_msr {
 	unsigned __int64 control;
 	struct {
@@ -144,10 +150,11 @@ union __ia32_vmx_misc_msr {
 };
 
 // 0x480
+#define IA32_VMX_BASIC_MSR  0x480
 union __ia32_vmx_basic_msr {
 	unsigned __int64 control;
 	struct {
-		unsigned __int64 vmcs_revision_idetifier : 31;
+		unsigned __int64 vmcs_revision_identifier : 31;
 		unsigned __int64 always_0 : 1;
 		unsigned __int64 vmxon_region_size : 13;
 		unsigned __int64 rsvd0 : 3;
@@ -160,6 +167,7 @@ union __ia32_vmx_basic_msr {
 };
 
 // 0x481
+#define IA32_PINBASED_CTL_MSR  0x481
 union __ia32_pinbased_ctl_msr {
 	unsigned __int64 control;
 	struct {
@@ -173,7 +181,8 @@ union __ia32_pinbased_ctl_msr {
 	} bits;
 };
 
-// 0x 482
+// 0x482
+#define IA32_VMX_PRIMARY_PROCESSOR_BASED_CTL_MSR  0x482
 union __ia32_vmx_primary_processor_based_ctl_msr {
 	unsigned __int64 control;
 	struct {
@@ -208,6 +217,7 @@ union __ia32_vmx_primary_processor_based_ctl_msr {
 };
 
 // 0x48b
+#define IA32_VMX_SECONDARY_PROCESSOR_BASED_CTL_MSR  0x48b
 union __ia32_vmx_secondary_processor_based_ctl_msr {
 	unsigned __int64 control;
 	struct {
@@ -238,6 +248,7 @@ union __ia32_vmx_secondary_processor_based_ctl_msr {
 };
 
 // 0x483
+#define IA32_VMX_EXIT_CTL_MSR  0x483
 union __ia32_vmx_exit_ctl_msr {
 	unsigned __int64 control;
 	struct {
@@ -261,6 +272,7 @@ union __ia32_vmx_exit_ctl_msr {
 };
 
 // 0x484
+#define IA32_VMX_ENTRY_CTL_MSR  0x484
 union __ia32_vmx_entry_ctl_msr {
 	unsigned __int64 control;
 	struct {
@@ -278,3 +290,22 @@ union __ia32_vmx_entry_ctl_msr {
 		unsigned __int64 conceal_vmx_from_pt : 1;
 	} bits;
 };
+
+#pragma warning(pop)
+
+#define IA32_VMX_CR0_FIXED0 0x486
+#define IA32_VMX_CR0_FIXED1 0x487
+
+#define IA32_VMX_CR4_FIXED0 0x488
+#define IA32_VMX_CR4_FIXED1 0x489
+
+union __ia32_vmx_cr_fixed_msr {
+	struct {
+		unsigned long low;
+		long high;
+	} split;
+	long long all;
+};
+
+
+

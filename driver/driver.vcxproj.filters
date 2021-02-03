@@ -32,5 +32,11 @@
     <ClInclude Include="defs.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="vmx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="arch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
