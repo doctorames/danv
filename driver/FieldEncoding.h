@@ -31,12 +31,13 @@ enum __vmcs_width_e {
 #define VMCS_ENCODE_COMPONENT_FULL_64(type, index)  VMCS_ENCODE_COMPONENT_FULL(type, quadword, index)
 
 enum __vmcs_encoding_e {
-	// control 16-bit
+
+	// Control 16-bit
 	VPID = VMCS_ENCODE_COMPONENT_FULL_16(control, 0),
 	PostInterruptNotificationVector = VMCS_ENCODE_COMPONENT_FULL_16(control, 1),
 	ETPTIndex= VMCS_ENCODE_COMPONENT_FULL_16(control, 2),
 
-	// control 32-bit
+	// Control 32-bit
 	PinBasedVmExecutionControls = VMCS_ENCODE_COMPONENT_FULL_32(control, 0),
 	PrimaryProcBasedVmExecutionControls = VMCS_ENCODE_COMPONENT_FULL_32(control, 1),
 	ExecutionBitmap = VMCS_ENCODE_COMPONENT_FULL_32(control, 2),
@@ -56,7 +57,7 @@ enum __vmcs_encoding_e {
 	PleGap = VMCS_ENCODE_COMPONENT_FULL_32(control, 16),
 	PleWindow = VMCS_ENCODE_COMPONENT_FULL_32(control, 17),
 	
-	// control 64-bit
+	// Control 64-bit
 	AddrOfIoBitmapA = VMCS_ENCODE_COMPONENT_FULL_64(control, 0),
 	AddrOfIoBitmapB = VMCS_ENCODE_COMPONENT_FULL_64(control, 1),
 	AddrOfMsrBitmaps = VMCS_ENCODE_COMPONENT_FULL_64(control, 2),
@@ -86,7 +87,7 @@ enum __vmcs_encoding_e {
 	//////////////////////////////////////////// wait... where's 26?? <--------------------
 	EnclvExitingbitmap = VMCS_ENCODE_COMPONENT_FULL_64(control, 27),
 
-	// control natural width
+	// Control natural width
 	Cr0GuestHostMask = VMCS_ENCODE_COMPONENT_FULL(control, natural, 0),
 	Cr4GuestHostMask = VMCS_ENCODE_COMPONENT_FULL(control, natural, 1),
 	Cr0ReadShadow = VMCS_ENCODE_COMPONENT_FULL(control, natural, 2),
@@ -150,5 +151,86 @@ enum __vmcs_encoding_e {
 	GuestIa32Pkrs = VMCS_ENCODE_COMPONENT_FULL_64(guest, 12),
 
 	// Guest natural width
-	Cr0GuestHostMask = VMCS_ENCODE_COMPONENT_FULL(guest, natural, ),
+	GuestCr0 = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 0),
+	GuestCr3 = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 1),
+	GuestCr4 = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 2),
+	GuestEsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 3),
+	GuestCsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 4),
+	GuestSsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 5),
+	GuestDsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 6),
+	GuestFsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 7),
+	GuestGsBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 8),
+	GuestLdtrBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 9),
+	GuestTrBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 10),
+	GuestGdtrBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 11),
+	GuestIdtrBase = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 12),
+	GuestDr7 = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 13),
+	GuestRsp = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 14),
+	GuestRip = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 15),
+	GuestRflags = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 16),
+	GuestPendingDebugExceptions = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 17),
+	GuestIa32SysenterEsp = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 18),
+	GuestIa32SysenterEip = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 19),
+	GuestIa32SCet = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 20),
+	GuestSsp = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 21),
+	GuestIa32InterruptSspTableAddr = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 22),
+
+	// Host 16-bit
+	HostEsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 0),
+	HostCsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 1),
+	HostSsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 2),
+	HostDsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 3),
+	HostFsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 4),
+	HostGsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 5),
+	HostTrSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 6),
+
+	// Host 32-bit
+	HostIa32SysenterCs = VMCS_ENCODE_COMPONENT_FULL_32(host, 0),
+
+	// Host 64-bit
+	HostIa32Pat = VMCS_ENCODE_COMPONENT_FULL_64(host, 0),
+	HostIa32Efer = VMCS_ENCODE_COMPONENT_FULL_64(host, 1),
+	HostPerfGlobalCtrl = VMCS_ENCODE_COMPONENT_FULL_64(host, 2),
+	HostIa32Pkrs = VMCS_ENCODE_COMPONENT_FULL_64(host, 3),
+
+	// Host natural width
+	HostCr0 = VMCS_ENCODE_COMPONENT_FULL(host, natural, 0),
+	HostCr3 = VMCS_ENCODE_COMPONENT_FULL(host, natural, 1),
+	HostCr4 = VMCS_ENCODE_COMPONENT_FULL(host, natural, 2),
+	HostFsBase = VMCS_ENCODE_COMPONENT_FULL(host, natural, 3),
+	HostGsBase = VMCS_ENCODE_COMPONENT_FULL(host, natural, 4),
+	HostTrBase = VMCS_ENCODE_COMPONENT_FULL(host, natural, 5),
+	HostGdtrBase = VMCS_ENCODE_COMPONENT_FULL(host, natural, 6),
+	HostIdtrBase = VMCS_ENCODE_COMPONENT_FULL(host, natural, 7),
+	HostIa32SysenterEsp = VMCS_ENCODE_COMPONENT_FULL(host, natural, 8),
+	HostIa32SysenterEip = VMCS_ENCODE_COMPONENT_FULL(host, natural, 9),
+	HostRsp = VMCS_ENCODE_COMPONENT_FULL(host, natural, 10),
+	HostRip = VMCS_ENCODE_COMPONENT_FULL(host, natural, 11),
+	HostIa32SCet = VMCS_ENCODE_COMPONENT_FULL(host, natural, 12),
+	HostSsp = VMCS_ENCODE_COMPONENT_FULL(host, natural, 13),
+	HostIa32InterruptSspTableAddr = VMCS_ENCODE_COMPONENT_FULL(host, natural, 14),
+
+	// Read only (vmexit) 16-bit
+	// --- none ---
+
+	// Read only (vmexit) 32-bit
+	VmInstructionError = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 0),
+	ExitReason = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 1),
+	VmExitInterruptionInfo = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 2),
+	VmExitInterruptionErrorCode = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 3),
+	IdtVectoringInfoField = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 4),
+	IdtVectoringErrorCode = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 5),
+	VmExitInstructionLength = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 6),
+	VmExitInstructionInfo = VMCS_ENCODE_COMPONENT_FULL_32(vmexit, 7),
+
+	// Read only (vmexit) 64-bit
+	GuestPhysicalAddr = VMCS_ENCODE_COMPONENT_FULL_64(vmexit, 0),
+
+	// Read only (vmexit) natural width
+	ExitQualification = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 0),
+	IoRcx = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 1),
+	IoRsi = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 2),
+	IoRdi = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 3),
+	IoRip = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 4),
+	GuestlinearAddr = VMCS_ENCODE_COMPONENT_FULL(vmexit, natural, 5)
 };
