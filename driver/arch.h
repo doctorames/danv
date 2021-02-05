@@ -5,81 +5,102 @@
 union __cr4_t {
 	unsigned int all;
 	struct {
-		unsigned int vme : 1; // Virtual 8086 Mode Extensions
-		unsigned int pvi : 1; // Protected Mode Virtual Interrupts
-		unsigned int tsd : 1; // Time Stamp Disable
-		unsigned int de : 1;  // Debugging Extensions
-		unsigned int pse : 1; // Page Size Extensions
-		unsigned int pae : 1; // PAE
-		unsigned int mce : 1; // Machine Check Enable (enables MCEs)
-		unsigned int pge : 1; // Page Global Enable
-		unsigned int pce : 1; // Perfmon Counter Enable (allows RDPMC to be run from any protection level)
-		unsigned int osfxsr : 1; // OS Support for FXSAVE and FXSTOR instructions
-		unsigned int osxmmexcpt : 1; // OS Support for Unmasked SIMD Floating Point Exceptions
-		unsigned int umip : 1; // User Mode Instruction Prevention (throws #GP if you try to do SGDT, SIDT, SLDT, SMSW, or STR when CPL > 0)
-		unsigned int la57 : 1; // 57 bit Linear Address (see Vol 3: ch 4)
-		unsigned int vmxe : 1; // VMX Enable bit
-		unsigned int smxe : 1; // SMX Enable bit
-		unsigned int rsvd0 : 1;
-		unsigned int fsgsbase : 1; // FSGSBASE Enable bit (enables RDFSBASE, RDGSBASE, WRFSBASE, WRGSBASE - whatever that is)
-		unsigned int pcide : 1; // PCID Enable bit (Process Context Identifiers. See Vol3: 4.10.1. IA-32e mode only)
-		unsigned int osxsave : 1; // XSAVE and Processor Extended States Enable bit
-		unsigned int rsvd1 : 1;
-		unsigned int smep : 1; // SMEP Enable bit (Supervisor Mode Execution Prevention. See Vol3: 4.6)
-		unsigned int smap : 1; // SMAP Enable bit (Supervisor Mode Access Prevention. See Vol3: 4.6)
-		unsigned int pke : 1; // Enable Protection Keys for user mode pages
-		unsigned int cet : 1; // Control-Flow Enforcement Technology
-		unsigned int pks : 1; // Enable protection keys for supervisor-mode pages
-		unsigned int rsvd2 : 7;
+		unsigned int
+			vme : 1, // Virtual 8086 Mode Extensions
+			pvi : 1, // Protected Mode Virtual Interrupts
+			tsd : 1, // Time Stamp Disable
+			de : 1,  // Debugging Extensions
+			pse : 1, // Page Size Extensions
+			pae : 1, // PAE
+			mce : 1, // Machine Check Enable (enables MCEs)
+			pge : 1, // Page Global Enable
+			pce : 1, // Perfmon Counter Enable (allows RDPMC to be run from any protection level)
+			osfxsr : 1, // OS Support for FXSAVE and FXSTOR instructions
+			osxmmexcpt : 1, // OS Support for Unmasked SIMD Floating Point Exceptions
+			umip : 1, // User Mode Instruction Prevention (throws #GP if you try to do SGDT, SIDT, SLDT, SMSW, or STR when CPL > 0)
+			la57 : 1, // 57 bit Linear Address (see Vol 3: ch 4)
+			vmxe : 1, // VMX Enable bit
+			smxe : 1, // SMX Enable bit
+			: 1,
+			fsgsbase : 1, // FSGSBASE Enable bit (enables RDFSBASE, RDGSBASE, WRFSBASE, WRGSBASE - whatever that is)
+			pcide : 1, // PCID Enable bit (Process Context Identifiers. See Vol3: 4.10.1. IA-32e mode only)
+			osxsave : 1, // XSAVE and Processor Extended States Enable bit
+			rsvd1 : 1,
+			smep : 1, // SMEP Enable bit (Supervisor Mode Execution Prevention. See Vol3: 4.6)
+			smap : 1, // SMAP Enable bit (Supervisor Mode Access Prevention. See Vol3: 4.6)
+			pke : 1, // Enable Protection Keys for user mode pages
+			cet : 1, // Control-Flow Enforcement Technology
+			pks : 1, // Enable protection keys for supervisor-mode pages
+			: 7;
 	} bits;
 };
 
 union __cr0_t {
 	unsigned int all;
 	struct {
-		unsigned int pe : 1; // Protection Enable (enables protected mode)
-		unsigned int mp : 1; // Monitor Coprocessor
-		unsigned int em : 1; // Emulation
-		unsigned int ts : 1; // Task Switched
-		unsigned int et : 1; // Extension Type (archaic)
-		unsigned int ne : 1; // Numeric Error
-		unsigned int rsvd0 : 10;
-		unsigned int wp : 1; // Write Protect
-		unsigned int rsvd1 : 1;
-		unsigned int am : 1; // Alignment Mask
-		unsigned int rsvd2 : 10;
-		unsigned int nw : 1; // Not Write-through
-		unsigned int cd : 1; // Cache Disable
-		unsigned int pg : 1; // Paging
+		unsigned int
+			pe : 1, // Protection Enable (enables protected mode)
+			mp : 1, // Monitor Coprocessor
+			em : 1, // Emulation
+			ts : 1, // Task Switched
+			et : 1, // Extension Type (archaic)
+			ne : 1, // Numeric Error
+			: 10,
+			wp : 1, // Write Protect
+			: 1,
+			am : 1, // Alignment Mask
+			: 10,
+			nw : 1, // Not Write-through
+			cd : 1, // Cache Disable
+			pg : 1; // Paging
 	} bits;
 };
 
 union __rflags_t {
 	unsigned __int64 all;
 	struct {
-		unsigned __int64 carry : 1;
-		unsigned __int64 rsvd0 : 1;
-		unsigned __int64 parity : 1;
-		unsigned __int64 rsvd1 : 1;
-		unsigned __int64 aux_carry : 1;
-		unsigned __int64 rsvd2 : 1;
-		unsigned __int64 zero : 1;
-		unsigned __int64 sign : 1;
-		unsigned __int64 trap : 1;
-		unsigned __int64 interrupt_enable : 1;
-		unsigned __int64 direction : 1;
-		unsigned __int64 overflow : 1;
-		unsigned __int64 io_priv_level : 2;
-		unsigned __int64 nested_task : 1;
-		unsigned __int64 rsvd3 : 1;
-		unsigned __int64 resume : 1;
-		unsigned __int64 virt8086_mode : 1;
-		unsigned __int64 alignment_check_access_control : 1;
-		unsigned __int64 virt_interrupt : 1;
-		unsigned __int64 virt_interrupt_pending : 1;
-		unsigned __int64 id : 1;
-		unsigned __int64 rsvd4 : 10;
-		unsigned __int64 rsvd5 : 32;  // RFLAGS is just EFLAGS with the upper 32 bits unused
+		unsigned __int64
+			carry : 1,
+			: 1,
+			parity : 1,
+			: 1,
+			aux_carry : 1,
+			: 1,
+			zero : 1,
+			sign : 1,
+			trap : 1,
+			interrupt_enable : 1,
+			direction : 1,
+			overflow : 1,
+			io_priv_level : 2,
+			nested_task : 1,
+			: 1,
+			resume : 1,
+			virt8086_mode : 1,
+			alignment_check_access_control : 1,
+			virt_interrupt : 1,
+			virt_interrupt_pending : 1,
+			id : 1,
+			: 10,
+			: 32;  // RFLAGS is just EFLAGS with the upper 32 bits unused
+	} bits;
+};
+
+union __interrupt_command_register_t {
+	unsigned __int64 full;
+	struct {
+		unsigned __int64
+			vector : 8,
+			delivery_mode : 3,
+			destination_mode : 1,
+			delivery_status : 1,
+			: 1,
+			level : 1,
+			trigger_mode : 1,
+			: 2,
+			destination_short : 2,
+			: 35,
+			destination : 8;
 	} bits;
 };
 

@@ -25,11 +25,6 @@ DriverEntry(
 
 	DbgPrint("hey its me!!");
 	DbgPrint("VMX is %s", VmHasVmxSupport() == 1u ? "SUPPORTED" : "NOT SUPPORTED");
-//
-//#define DPFLTR_ERROR_LEVEL 0
-//#define DPFLTR_WARNING_LEVEL 1
-//#define DPFLTR_TRACE_LEVEL 2
-//#define DPFLTR_INFO_LEVEL 3
 
 	logit(DPFLTR_ERROR_LEVEL, "%s", "DPFLTR_ERROR_LEVEL");
 	logit(DPFLTR_WARNING_LEVEL, "%s", "DPFLTR_WARNING_LEVEL");
