@@ -100,7 +100,7 @@ union __interrupt_command_register_t {
 			: 2,
 			destination_short : 2,
 			: 35,
-			destination : 8;
+			destination_shorthand : 8;
 	} bits;
 };
 

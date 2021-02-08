@@ -36,6 +36,10 @@ struct __vmm_context_t {
 
 #pragma warning(push)
 #pragma warning(disable: 4214)
+
+
+// This controls how asynchronous events are handled in the guest. (Like nmi's and the like)
+// Basically, what should/shouldn't cause a vmexit
 union __vmx_pinbased_control_msr {
 	unsigned __int64 all;
 	struct {
@@ -50,6 +54,8 @@ union __vmx_pinbased_control_msr {
 	} bits;
 };
 
+// This controls how SYNChronous events are handled. That is, events that happen as a matter of code execution. (Like cpuid, rdmsr, and the like)
+// 
 union __vmx_primary_processor_based_control_t {
 	unsigned __int64 all;
 	struct {
@@ -136,7 +142,7 @@ union __vmx_exit_control_t {
 			save_vmx_preeemption_timer_value : 1,
 			clear_ia32_bndcfgs : 1,
 			conceal_vmx_from_pt : 1;
-	};
+	} bits;
 };
 
 union __vmx_entry_control_t {
