@@ -2,6 +2,7 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4214)
+#pragma warning(disable: 4201)
 union __cr4_t {
 	unsigned int all;
 	struct {
@@ -104,7 +105,91 @@ union __interrupt_command_register_t {
 	} bits;
 };
 
+struct __segment_descriptor_64_t {
+	unsigned __int16 segment_limit_low;
+	unsigned __int16 base_low;
+	union {
+		struct {
+			unsigned __int32
+				base_middle : 8,
+				segment_type : 4,
+				descriptor_type : 1,
+				dpl : 2,
+				present : 1,
+				segment_limit_high : 4,
+				system : 1,
+				long_mode : 1,
+				default_big : 1,
+				granularity : 1,
+				base_high : 8;
+		};
+		unsigned __int32 flags;
+	};
+	unsigned __int32 base_upper;
+	unsigned __int32 reserved;
+};
+
+struct __segment_descriptor_32_t {
+	unsigned __int16 segment_limit_low;
+	unsigned __int16 base_low;
+	union {
+		struct {
+			unsigned __int32
+				base_middle : 8,
+				segment_type : 4,
+				descriptor_type : 1,
+				dpl : 2,
+				present : 1,
+				segment_limit_high : 4,
+				system : 1,
+				long_mode : 1,
+				default_big : 1,
+				granularity : 1,
+				base_high : 8;
+		};
+		unsigned __int32 flags;
+	};
+};
+
+union __segment_selector_t {
+	struct {
+		unsigned __int16
+			rpl : 2,
+			table : 1,
+			index : 13;
+	};
+	unsigned __int16 flags;
+};
+
+union __segment_access_rights_t {
+	struct {
+		unsigned __int32
+			type : 4,
+			descriptor_type : 1,
+			dpl : 2,
+			present : 1,
+			: 4,
+			available : 1,
+			long_mode : 1,
+			default_big : 1,
+			granularity : 1,
+			unusable : 1,
+			: 15;
+	};
+	unsigned __int32 flags;
+};
+
 #pragma warning(pop)
+
+#pragma pack(push,1)
+struct __pseudo_descriptor_48_t {
+	unsigned __int16 limit;
+	unsigned __int32 base_address;
+};
+
+#pragma pack(pop)
+
+
 
 
 

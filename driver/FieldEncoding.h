@@ -97,6 +97,8 @@ enum __vmcs_encoding_e {
 	Cr3TargetValue2 = VMCS_ENCODE_COMPONENT_FULL(control, natural, 6),
 	Cr3TargetValue3 = VMCS_ENCODE_COMPONENT_FULL(control, natural, 7),
 
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Guest 16-bit
 	GuestEsSelector = VMCS_ENCODE_COMPONENT_FULL_16(guest, 0), // register
 	GuestCsSelector = VMCS_ENCODE_COMPONENT_FULL_16(guest, 1), // register
@@ -136,7 +138,7 @@ enum __vmcs_encoding_e {
 	VmxPreemptionTimerValue = VMCS_ENCODE_COMPONENT_FULL_32(guest, 23),
 
 	// Guest 64-bit
-	VmcsLinkpointer = VMCS_ENCODE_COMPONENT_FULL_64(guest, 0), // register
+	VmcsLinkPointer = VMCS_ENCODE_COMPONENT_FULL_64(guest, 0), // register
 	GuestIa32Debugctl = VMCS_ENCODE_COMPONENT_FULL_64(guest, 1), // register
 	GuestIa32Pat = VMCS_ENCODE_COMPONENT_FULL_64(guest, 2), // register
 	GuestIa32Efer = VMCS_ENCODE_COMPONENT_FULL_64(guest, 3), // register
@@ -175,6 +177,8 @@ enum __vmcs_encoding_e {
 	GuestSsp = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 21),
 	GuestIa32InterruptSspTableAddr = VMCS_ENCODE_COMPONENT_FULL(guest, natural, 22),
 
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Host 16-bit
 	HostEsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 0), // register
 	HostCsSelector = VMCS_ENCODE_COMPONENT_FULL_16(host, 1), // register
@@ -210,6 +214,8 @@ enum __vmcs_encoding_e {
 	HostSsp = VMCS_ENCODE_COMPONENT_FULL(host, natural, 13),
 	HostIa32InterruptSspTableAddr = VMCS_ENCODE_COMPONENT_FULL(host, natural, 14),
 
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Read only (vmexit) 16-bit
 	// --- none ---
 

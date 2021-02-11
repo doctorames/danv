@@ -4,7 +4,9 @@
 #include "defs.h"
 #include "arch.h"
 #include "vmx.h"
+#include "msr.h"
 #include "FieldEncoding.h"
+#include "vmm_intrin.h"
 
 #include <stdarg.h>
 
@@ -71,12 +73,25 @@ struct __vcpu_t* init_vcpu() {
 
 	RtlSecureZeroMemory(vcpu, sizeof(struct __vcpu_t));
 	logit(DPFLTR_ERROR_LEVEL, "%s: vcpu:%p", __FUNCTION__, vcpu);
+
+	vcpu->msr_bitmap = ExAllocatePoolWithTag(NonPagedPool, PAGE_SIZE, VMM_TAG);
+	RtlSecureZeroMemory(vcpu->msr_bitmap, PAGE_SIZE);
+	vcpu->msr_bitmap_physical = MmGetPhysicalAddress(vcpu->msr_bitmap).QuadPart;
+
+
 	return vcpu;
 }
 
 int vmm_init() {
 	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
 	struct __vmm_context_t *vmm_context = allocate_vmm_context();
+	PROCESSOR_NUMBER procnum;
+	GROUP_AFFINITY affinity, old_affinity;
+	//KIRQL old_irql;
+
+	vmm_context = allocate_vmm_context();
+
+
 	logit(DPFLTR_INFO_LEVEL, "%s: vmm_context->processor_count: %d", __FUNCTION__, vmm_context->processor_count);
 
 
@@ -86,8 +101,17 @@ int vmm_init() {
 		vmm_context->vcpu_table[i]->vmm_context = vmm_context;
 	}
 
-	// struct __vmm_context_t *vmm, void *guest_rip
-	init_logical_processor(vmm_context, NULL);
+	for (unsigned i = 0; i < vmm_context->processor_count; i++) {
+		KeGetProcessorNumberFromIndex(i, &procnum);
+		RtlSecureZeroMemory(&affinity, sizeof(affinity));
+		affinity.Group = procnum.Group;
+		affinity.Mask = (KAFFINITY) 1 << procnum.Number;
+		KeSetSystemGroupAffinityThread(&affinity, &old_affinity);
+
+		init_logical_processor(vmm_context, 0);
+
+		KeRevertToUserGroupAffinityThread(&old_affinity);
+	}
 
 	return 1;
 }
@@ -136,6 +160,72 @@ void logit(ULONG level, const char *fmt, ...) {
 	va_end(args);
 }
 
+static void adjust_allowed_bits(unsigned int cap_msr, unsigned __int32 *value) {
+
+	union __vmx_true_control_settings_t cap;
+
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	cap.all = __readmsr(cap_msr);
+
+	*value |= cap.allowed.allowed_0_settings;
+	*value &= cap.allowed.allowed_1_settings;
+}
+
+static void adjust_entry_controls(union __vmx_entry_control_t *entry_control) {
+	unsigned int capability_msr;
+	union __ia32_vmx_basic_msr basic_msr = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
+
+	capability_msr = basic_msr.bits.true_controls ? IA32_VMX_TRUE_ENTRY_CTLS_MSR : IA32_VMX_ENTRY_CTLS_MSR;
+	adjust_allowed_bits(capability_msr, &entry_control->all);
+}
+
+static void adjust_exit_controls(union __vmx_exit_control_t *exit_control) {
+	unsigned int capability_msr;
+	union __ia32_vmx_basic_msr basic_msr = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
+
+	capability_msr = basic_msr.bits.true_controls ? IA32_VMX_TRUE_EXIT_CTLS_MSR : IA32_VMX_EXIT_CTLS_MSR;
+	adjust_allowed_bits(capability_msr, &exit_control->all);
+}
+
+static void adjust_pinbased_controls(union __vmx_pinbased_control_t *pinbased_control) {
+	unsigned int capability_msr;
+	union __ia32_vmx_basic_msr basic_msr = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
+
+	capability_msr = basic_msr.bits.true_controls ? IA32_VMX_TRUE_PINBASED_CTLS_MSR : IA32_VMX_PINBASED_CTLS_MSR;
+	adjust_allowed_bits(capability_msr, &pinbased_control->all);
+}
+
+static void adjust_primary_procbased_controls(union __vmx_primary_processor_based_control_t *procbased_control) {
+	unsigned int capability_msr;
+	union __ia32_vmx_basic_msr basic_msr = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
+
+	capability_msr = basic_msr.bits.true_controls ? IA32_VMX_TRUE_PROCBASED_CTLS_MSR : IA32_VMX_PROCBASED_CTLS_MSR;
+	adjust_allowed_bits(capability_msr, &procbased_control->all);
+}
+
+static void adjust_secondary_procbased_controls(union __vmx_secondary_processor_based_control_t *procbased_control) {
+	unsigned int capability_msr;
+	union __ia32_vmx_basic_msr basic_msr = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+
+	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
+
+	capability_msr = IA32_VMX_PROCBASED_CTLS2_MSR;
+	adjust_allowed_bits(capability_msr, &procbased_control->all);
+}
 
 // Grab some contiguous memory out in physical memory space, and map that into virtual memory
 // as a page and make that a __vmcs_t for the passed-in vcpu.
@@ -166,6 +256,64 @@ int init_vmxon(struct __vcpu_t *vcpu) {
 int init_vmcs(struct __vcpu_t *vcpu, void *guest_rsp, void (*guest_rip)(), int is_pt_allowed) {
 	union __ia32_vmx_basic_msr msr = { 0 };
 	PHYSICAL_ADDRESS maxAddr;
+	union __vmx_entry_control_t entry_control = { 0 };
+	union __vmx_exit_control_t  exit_control = { 0 };
+	union __vmx_pinbased_control_t pinbased_control = { 0 };
+	union __vmx_primary_processor_based_control_t primary_procbased_ctl = { 0 };
+	union __vmx_secondary_processor_based_control_t secondary_procbased_ctl = { 0 };
+	struct __pseudo_descriptor_48_t gdtr;
+	struct __pseudo_descriptor_48_t idtr;
+
+	_sgdt(&gdtr);
+	__sidt(&idtr);
+
+	entry_control.bits.ia32e_mode_guest = 1;
+	adjust_entry_controls(&entry_control);
+
+	exit_control.bits.host_address_space_size = 1;
+	adjust_exit_controls(&exit_control);
+
+	adjust_pinbased_controls(&pinbased_control);
+
+	primary_procbased_ctl.bits.active_secondary_controls = 1;
+	primary_procbased_ctl.bits.use_msr_bitmaps = 1;
+	adjust_primary_procbased_controls(&primary_procbased_ctl);
+
+	secondary_procbased_ctl.bits.enable_invpcid = 1;
+	secondary_procbased_ctl.bits.enable_rdtscp = 1;
+	secondary_procbased_ctl.bits.enable_xsave_xrstor = 1;
+	adjust_secondary_procbased_controls(&secondary_procbased_ctl);
+
+	__vmx_vmwrite(VmEntryControls, entry_control.all);
+	__vmx_vmwrite(VmExitControls, exit_control.all);
+	__vmx_vmwrite(PinBasedVmExecutionControls, pinbased_control.all);
+	__vmx_vmwrite(PrimaryProcBasedVmExecutionControls, primary_procbased_ctl.all);
+	__vmx_vmwrite(SecondaryProcBasedVmExecutionControls, secondary_procbased_ctl.all);
+
+	// Segment selectors
+	__vmx_vmwrite(GuestEsSelector, __read_es());
+	__vmx_vmwrite(GuestCsSelector, __read_cs());
+	__vmx_vmwrite(GuestSsSelector, __read_ss());
+	__vmx_vmwrite(GuestDsSelector, __read_ds());
+	__vmx_vmwrite(GuestFsSelector, __read_fs());
+	__vmx_vmwrite(GuestGsSelector, __read_gs());
+	__vmx_vmwrite(GuestLdtrSelector, __read_ldtr());
+	__vmx_vmwrite(GuestTrSelector, __read_tr());
+
+	__vmx_vmwrite(GuestEsLimit, __segmentlimit(__read_es()));
+	__vmx_vmwrite(GuestCsLimit, __segmentlimit(__read_cs()));
+	__vmx_vmwrite(GuestSsLimit, __segmentlimit(__read_ss()));
+	__vmx_vmwrite(GuestDsLimit, __segmentlimit(__read_ds()));
+	__vmx_vmwrite(GuestFsLimit, __segmentlimit(__read_fs()));
+	__vmx_vmwrite(GuestGsLimit, __segmentlimit(__read_gs()));
+	__vmx_vmwrite(GuestLdtrLimit, __segmentlimit(__read_ldtr()));
+	__vmx_vmwrite(GuestTrLimit, __segmentlimit(__read_tr()));
+
+	__vmx_vmwrite(GuestGdtrLimit, gdtr.limit);
+	__vmx_vmwrite(GuestIdtrLimit, idtr.limit);
+	__vmx_vmwrite(GuestGdtrBase, gdtr.base_address);
+	__vmx_vmwrite(GuestIdtrBase, idtr.base_address);
+
 	is_pt_allowed;
 	guest_rsp;
 	guest_rip;
@@ -205,11 +353,9 @@ void adjust_control_registers() {
 	__writecr4(cr4.all);
 }
 
-
-
-void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rip) {
+void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rsp) {
 	//union __ia32_vmx_misc_msr msr;
-	guest_rip;
+	guest_rsp;
 	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
 
 	unsigned long procNum = KeGetCurrentProcessorNumber();
@@ -235,6 +381,37 @@ void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rip) {
 		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_on() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
 		return;
 	}
+
+	// Now init the vmcs
+	if (__vmx_vmclear(&vmm->vcpu_table[procNum]->vmcs_physical) != VMX_OK) {
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmclear() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
+		return;
+	}
+
+	if (__vmx_vmptrld(&vmm->vcpu_table[procNum]->vmcs_physical) != VMX_OK) {
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmptrld() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
+		return;
+	}
+
+	__vmx_vmwrite(GuestCr0, __readcr0());
+	__vmx_vmwrite(GuestCr3, __readcr3());
+	__vmx_vmwrite(GuestCr4, __readcr4());
+	__vmx_vmwrite(GuestDr7, __readdr(7));
+	__vmx_vmwrite(GuestRsp, vmm->vcpu_table[procNum]->guest_rsp);
+	__vmx_vmwrite(GuestRip, vmm->vcpu_table[procNum]->guest_rip);
+
+	__vmx_vmwrite(GuestRflags, __readeflags());
+	__vmx_vmwrite(GuestIa32Debugctl, __readmsr(IA32_DEBUGCTL_MSR));
+	__vmx_vmwrite(GuestIa32SysenterEsp, __readmsr(IA32_SYSENTER_ESP_MSR));
+	__vmx_vmwrite(GuestIa32SysenterEip, __readmsr(IA32_SYSENTER_EIP_MSR));
+	__vmx_vmwrite(GuestIa32SysenterCs, __readmsr(IA32_SYSENTER_CS_MSR));
+	__vmx_vmwrite(VmcsLinkPointer, MAXUINT64);
+	__vmx_vmwrite(GuestFsBase, __readmsr(IA32_FS_BASE_MSR));
+	__vmx_vmwrite(GuestGsBase, __readmsr(IA32_GS_BASE_MSR));
+
+	__vmx_vmwrite(Cr0ReadShadow, __readcr0());
+	__vmx_vmwrite(Cr4ReadShadow, __readcr4());
+	
 
 	logit(DPFLTR_INFO_LEVEL, "%s: SUCCESS! vcpu %d is in vmxon!", __FUNCTION__, procNum);
 

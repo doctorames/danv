@@ -2,6 +2,7 @@
 
 #define VMM_TAG '_VMM'
 #define VMM_STACK_SIZE (0x1000 * 6)
+#define VMX_OK  0
 
 struct __vmcs_t {
 	union {
@@ -23,7 +24,13 @@ struct __vcpu_t {
 	struct __vmcs_t *vmxon;
 	unsigned __int64 vmxon_physical;
 
+	void *msr_bitmap;
+	unsigned __int64 msr_bitmap_physical;
+
 	struct __vmm_context_t *vmm_context;
+
+	unsigned __int64 guest_rsp;
+	unsigned __int64 guest_rip;
 };
 
 
@@ -40,10 +47,10 @@ struct __vmm_context_t {
 
 // This controls how asynchronous events are handled in the guest. (Like nmi's and the like)
 // Basically, what should/shouldn't cause a vmexit
-union __vmx_pinbased_control_msr {
-	unsigned __int64 all;
+union __vmx_pinbased_control_t {
+	unsigned __int32 all;
 	struct {
-		unsigned __int64
+		unsigned __int32
 			external_interrupt_exiting : 1,
 			: 1,
 			nmi_exiting : 1,
@@ -57,9 +64,9 @@ union __vmx_pinbased_control_msr {
 // This controls how SYNChronous events are handled. That is, events that happen as a matter of code execution. (Like cpuid, rdmsr, and the like)
 // 
 union __vmx_primary_processor_based_control_t {
-	unsigned __int64 all;
+	unsigned __int32 all;
 	struct {
-		unsigned __int64
+		unsigned __int32
 			:2,
 			interrupt_window_exiting : 1,
 			use_tsc_offsetting : 1,
@@ -91,9 +98,9 @@ union __vmx_primary_processor_based_control_t {
 };
 
 union __vmx_secondary_processor_based_control_t {
-	unsigned __int64 all;
+	unsigned __int32 all;
 	struct {
-		unsigned __int64
+		unsigned __int32
 			virtualize_apic_access : 1,
 			enable_ept : 1,
 			descriptor_table_exiting : 1,
@@ -123,9 +130,9 @@ union __vmx_secondary_processor_based_control_t {
 };
 
 union __vmx_exit_control_t {
-	unsigned __int64 all;
+	unsigned __int32 all;
 	struct {
-		unsigned __int64
+		unsigned __int32
 			:2,
 			save_dbg_controls : 1,
 			: 6,
@@ -141,18 +148,22 @@ union __vmx_exit_control_t {
 			load_ia32_efer : 1,
 			save_vmx_preeemption_timer_value : 1,
 			clear_ia32_bndcfgs : 1,
-			conceal_vmx_from_pt : 1;
+			conceal_vmx_from_pt : 1,
+			clear_ia32_rtit_ctl : 1,
+			: 2,
+			load_cet_state : 1,
+			load_pkrs : 1;
 	} bits;
 };
 
 union __vmx_entry_control_t {
-	unsigned __int64 all;
+	unsigned __int32 all;
 	struct {
-		unsigned __int64
+		unsigned __int32
 			:2,
 			load_dbg_controls : 1,
 			: 6,
-			ia32_mode_guest : 1,
+			ia32e_mode_guest : 1,
 			entry_to_smm : 1,
 			deactivate_dual_monitor_treatment : 1,
 			: 1,
@@ -160,10 +171,22 @@ union __vmx_entry_control_t {
 			load_ia32_pat : 1,
 			load_ia32_efer : 1,
 			load_ia32_bndcfgs : 1,
-			conceal_vmx_from_pt : 1;
+			conceal_vmx_from_pt : 1,
+			load_ia32_rtit_ctl : 1,
+			: 1,
+			load_cet_state : 1,
+			: 1,
+			load_pkrs : 1;
 	} bits;
 
 };
 
-
 #pragma warning(pop)
+
+union __vmx_true_control_settings_t {
+	unsigned __int64 all;
+	struct {
+		unsigned __int32 allowed_0_settings;
+		unsigned __int32 allowed_1_settings;
+	} allowed;
+};
