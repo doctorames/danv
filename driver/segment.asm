@@ -40,5 +40,13 @@ __read_gs proc
 	ret
 __read_gs endp
 
+__load_ar proc
+    lar    rax, rcx
+	jz     no_error
+	xor    rax,rcx
+no_error:
+    ret
+__load_ar endp
+
 
 END

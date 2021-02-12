@@ -27,6 +27,9 @@
     <ClCompile Include="entry.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="segment_helpers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vmm_intrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="segment_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

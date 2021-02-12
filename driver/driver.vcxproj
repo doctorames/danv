@@ -142,12 +142,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="entry.c" />
+    <ClCompile Include="segment_helpers.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arch.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="FieldEncoding.h" />
     <ClInclude Include="msr.h" />
+    <ClInclude Include="segment_helpers.h" />
     <ClInclude Include="vmm_intrin.h" />
     <ClInclude Include="vmx.h" />
   </ItemGroup>

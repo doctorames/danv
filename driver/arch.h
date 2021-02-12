@@ -105,6 +105,7 @@ union __interrupt_command_register_t {
 	} bits;
 };
 
+// 3.7.2.3
 struct __segment_descriptor_64_t {
 	unsigned __int16 segment_limit_low;
 	unsigned __int16 base_low;
@@ -129,6 +130,11 @@ struct __segment_descriptor_64_t {
 	unsigned __int32 reserved;
 };
 
+// 3.3.5
+#define SEG_DESC_TYPE_TSS_AVAILABLE  9
+#define SEG_DESC_TYPE_TSS_BUSY       10
+
+// 3.3.4.5
 struct __segment_descriptor_32_t {
 	unsigned __int16 segment_limit_low;
 	unsigned __int16 base_low;
@@ -136,7 +142,7 @@ struct __segment_descriptor_32_t {
 		struct {
 			unsigned __int32
 				base_middle : 8,
-				segment_type : 4,
+				type : 4,
 				descriptor_type : 1,
 				dpl : 2,
 				present : 1,
@@ -161,6 +167,7 @@ union __segment_selector_t {
 	unsigned __int16 flags;
 };
 
+// 3.24.4.1
 union __segment_access_rights_t {
 	struct {
 		unsigned __int32
@@ -168,13 +175,13 @@ union __segment_access_rights_t {
 			descriptor_type : 1,
 			dpl : 2,
 			present : 1,
-			: 4,
+			rsvd0 : 4,
 			available : 1,
 			long_mode : 1,
 			default_big : 1,
 			granularity : 1,
 			unusable : 1,
-			: 15;
+			rsvd1 : 15;
 	};
 	unsigned __int32 flags;
 };

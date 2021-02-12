@@ -7,6 +7,7 @@
 #include "msr.h"
 #include "FieldEncoding.h"
 #include "vmm_intrin.h"
+#include "segment_helpers.h"
 
 #include <stdarg.h>
 
@@ -227,6 +228,8 @@ static void adjust_secondary_procbased_controls(union __vmx_secondary_processor_
 	adjust_allowed_bits(capability_msr, &procbased_control->all);
 }
 
+
+
 // Grab some contiguous memory out in physical memory space, and map that into virtual memory
 // as a page and make that a __vmcs_t for the passed-in vcpu.
 int init_vmxon(struct __vcpu_t *vcpu) {
@@ -313,6 +316,20 @@ int init_vmcs(struct __vcpu_t *vcpu, void *guest_rsp, void (*guest_rip)(), int i
 	__vmx_vmwrite(GuestIdtrLimit, idtr.limit);
 	__vmx_vmwrite(GuestGdtrBase, gdtr.base_address);
 	__vmx_vmwrite(GuestIdtrBase, idtr.base_address);
+
+	__vmx_vmwrite(GuestEsAccessRights, read_segment_access_rights(__read_es()));
+	__vmx_vmwrite(GuestCsAccessRights, read_segment_access_rights(__read_cs()));
+	__vmx_vmwrite(GuestSsAccessRights, read_segment_access_rights(__read_ss()));
+	__vmx_vmwrite(GuestDsAccessRights, read_segment_access_rights(__read_ds()));
+	__vmx_vmwrite(GuestFsAccessRights, read_segment_access_rights(__read_fs()));
+	__vmx_vmwrite(GuestGsAccessRights, read_segment_access_rights(__read_gs()));
+	__vmx_vmwrite(GuestLdtrAccessRights, read_segment_access_rights(__read_ldtr()));
+	__vmx_vmwrite(GuestTrAccessRights, read_segment_access_rights(__read_tr()));
+
+	__vmx_vmwrite(GuestLdtrBase, get_segment_base(gdtr.base_address, __read_ldtr()));
+	__vmx_vmwrite(GuestTrBase, get_segment_base(gdtr.base_address, __read_tr()));
+
+
 
 	is_pt_allowed;
 	guest_rsp;
