@@ -30,6 +30,9 @@
     <ClCompile Include="segment_helpers.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vmexit.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defs.h">
@@ -50,12 +53,15 @@
     <ClInclude Include="vmm_intrin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="segment_helpers.h">
+    <ClInclude Include="asm_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="segment.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="entrypoint.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>

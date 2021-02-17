@@ -1,5 +1,5 @@
 
-#include "segment_helpers.h"
+#include "asm_helpers.h"
 
 
  unsigned __int32 read_segment_access_rights(unsigned __int16 segment_selector) {

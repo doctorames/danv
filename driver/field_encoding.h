@@ -49,7 +49,7 @@ enum __vmcs_encoding_e {
 	VmExitMsrLoadCount = VMCS_ENCODE_COMPONENT_FULL_32(control, 8),
 	VmEntryControls = VMCS_ENCODE_COMPONENT_FULL_32(control, 9),
 	VmEntryMsrLoadCount = VMCS_ENCODE_COMPONENT_FULL_32(control, 10),
-	VmEntryInterruptInfoField = VMCS_ENCODE_COMPONENT_FULL_32(control, 11),
+	VmEntryInterruptionInfoField = VMCS_ENCODE_COMPONENT_FULL_32(control, 11),
 	VmEntryExceptionErrorCode = VMCS_ENCODE_COMPONENT_FULL_32(control, 12),
 	VmEntryInstructionLength = VMCS_ENCODE_COMPONENT_FULL_32(control, 13),
 	TprThreshold = VMCS_ENCODE_COMPONENT_FULL_32(control, 14),

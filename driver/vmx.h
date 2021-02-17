@@ -1,8 +1,82 @@
 #pragma once
+#include <xmmintrin.h>
+#include "arch.h"
 
 #define VMM_TAG '_VMM'
 #define VMM_STACK_SIZE (0x1000 * 6)
 #define VMX_OK  0
+
+typedef  unsigned __int32 vmexit_status_t;
+#define VMEXIT_HANDLED  0
+#define VMEXIT_ERROR    1
+
+
+
+
+enum __vmexit_reason_e {
+	vmexit_nmi = 0,
+	vmexit_ext_int,
+	vmexit_triple_fault,
+	vmexit_init_sugnal,
+	vmexit_sipi,
+	vmexit_smi,
+	vmexit_other_smi,
+	vmexit_interrupt_window,
+	vmexit_nmi_window,
+	vmexit_task_switch,
+	vmexit_cpuid,
+	vmexit_getsec,
+	vmexit_hlt,
+	vmexit_invd,
+	vmexit_invlpg,
+	vmexit_rdpmc,
+	vmexit_rdtsc,
+	vmexit_rsm,
+	vmexit_vmcall,
+	vmexit_vmclear,
+	vmexit_vmlaunch,
+	vmexit_vmptrld,
+	vmexit_vmptrst,
+	vmexit_vmread,
+	vmexit_vmresume,
+	vmexit_vmwrite,
+	vmexit_vmxoff,
+	vmexit_vmxon,
+	vmexit_control_register_access,
+	vmexit_mov_dr,
+	vmexit_io_intruction,
+	vmexit_rdmsr,
+	vmexit_wrmsr,
+	vmexit_vmentry_failure_due_to_guest_state,
+	vmexit_vmentry_failure_due_to_msr_loading,
+	vmexit_mwait = 36,
+	vmexit_monitor_trap_flag,
+	vmexit_monitor = 39,
+	vmexit_pause,
+	vmexit_vmentry_failure_due_to_machine_check_event,
+	vmexit_tpr_below_threshold = 43,
+	vmexit_apic_access,
+	vmexit_virtualized_eoi,
+	vmexit_access_to_gdtr_or_idtr,
+	vmexit_access_to_ldtr_or_tr,
+	vmexit_ept_violation,
+	vmexit_ept_misconfiguration,
+	vmexit_invept,
+	vmexit_rdtscp,
+	vmexit_vmx_preemption_timer_expired,
+	vmexit_invvpid,
+	vmexit_wbinvd,
+	vmexit_xsetbv,
+	vmexit_apic_write,
+	vmexit_rdrand,
+	vmexit_invpcid,
+	vmexit_vmfunc,
+	vmexit_encls,
+	vmexit_rdseed,
+	vmexit_pml_full,
+	vmexit_xsaves,
+	vmexit_xrstors
+};
 
 struct __vmcs_t {
 	union {
@@ -17,29 +91,36 @@ struct __vmcs_t {
 	char data[0x1000 - 2*sizeof(unsigned int)];
 };
 
+struct __vmm_context_t {
+	unsigned __int64 processor_count;
+	__declspec(align(4096)) struct __vcpu_t **vcpu_table;
+	__declspec(align(4096)) void *msr_bitmap;
+};
+
+struct __vmm_stack_t {
+	unsigned char limit[VMM_STACK_SIZE - sizeof(struct __vmm_context_t)];
+	struct __vmm_context_t vmm_context;
+};
+
 struct __vcpu_t {
+
+	unsigned __int64 status;
+	unsigned __int64 guest_rsp;
+	unsigned __int64 guest_rip;
+
 	struct __vmcs_t *vmcs;
 	unsigned __int64 vmcs_physical;
 
 	struct __vmcs_t *vmxon;
 	unsigned __int64 vmxon_physical;
 
-	void *msr_bitmap;
-	unsigned __int64 msr_bitmap_physical;
+	//void *msr_bitmap;
+	//unsigned __int64 msr_bitmap_physical;
 
-	struct __vmm_context_t *vmm_context;
+	//struct __vmm_context_t *vmm_context;
 
-	unsigned __int64 guest_rsp;
-	unsigned __int64 guest_rip;
+	__declspec(align(4096)) struct __vmm_stack_t vmm_stack;
 };
-
-
-struct __vmm_context_t {
-	unsigned __int64 processor_count;
-	struct __vcpu_t **vcpu_table;
-	char *stack;
-};
-
 
 #pragma warning(push)
 #pragma warning(disable: 4214)
@@ -181,7 +262,40 @@ union __vmx_entry_control_t {
 
 };
 
+union __vmx_exit_reason_field_t {
+	unsigned __int64 all;
+	struct {
+		unsigned __int64
+			basic_exit_reason : 16,
+			must_be_zero_1 : 11,
+			was_in_enclave_mode : 1,
+			pending_mtf_exit : 1,
+			exit_from_vmx_root : 1,
+			must_be_zero_2 : 1,
+			vm_entry_failure : 1;
+	} bits;
+};
+
 #pragma warning(pop)
+
+struct __vmexit_guest_registers_t {
+	unsigned __int64
+		rax,
+		rbx,
+		rcx,
+		rdx,
+		rbp,
+		rsi,
+		rdi,
+		r8,
+		r9,
+		r10,
+		r11,
+		r12,
+		r13,
+		r14,
+		r15;
+};
 
 union __vmx_true_control_settings_t {
 	unsigned __int64 all;
@@ -189,4 +303,45 @@ union __vmx_true_control_settings_t {
 		unsigned __int32 allowed_0_settings;
 		unsigned __int32 allowed_1_settings;
 	} allowed;
+};
+
+
+
+
+struct __guest_registers_t {
+	__m128 xmm[6];
+	void *padding;
+	unsigned __int64
+		r15,
+		r14,
+		r13,
+		r12,
+		r11,
+		r10,
+		r9,
+		r8,
+		rdi,
+		rsi,
+		rbp,
+		rdx,
+		rcx,
+		rbx,
+		rax;
+};
+
+struct __vmm_exit_stack_t {
+	struct __guest_registers_t guest_registers;
+	struct __vmm_context_t vmm_context;
+};
+
+struct __ext_registers_t {
+	unsigned __int64 rip;
+	unsigned __int64 rsp;
+	union __rflags_t rflags;
+};
+
+struct __gcpu_context_t {
+	void *vcpu;
+	struct __ext_registers_t ext_registers;
+	struct __guest_registers_t guest_registers;
 };
