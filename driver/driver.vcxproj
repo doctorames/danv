@@ -147,8 +147,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arch.h" />
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="defs.h" />
-    <ClInclude Include="FieldEncoding.h" />
+    <ClInclude Include="field_encoding.h" />
+    <ClInclude Include="interrupt_info.h" />
     <ClInclude Include="msr.h" />
     <ClInclude Include="asm_helpers.h" />
     <ClInclude Include="vmm_intrin.h" />

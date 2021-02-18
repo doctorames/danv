@@ -1,10 +1,14 @@
-
+#include <ntddk.h>
 #include "asm_helpers.h"
+
+
+void logit(ULONG level, const char *fmt, ...);
 
 
  unsigned __int32 read_segment_access_rights(unsigned __int16 segment_selector) {
 	union __segment_selector_t selector;
 	union __segment_access_rights_t vmx_ar = { 0 };
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	selector.flags = segment_selector;
 
@@ -29,12 +33,17 @@ unsigned __int64 get_segment_base(unsigned __int64 gdt_base, unsigned __int16 ss
 	 struct __segment_descriptor_32_t *descriptor;
 	 struct __segment_descriptor_64_t *descriptor_64;
 	 unsigned __int64 segment_base = 0;
-	 
+	 logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 	 
 	 selector.flags = ss_in;
 
 	 // Check for null selector
-	 if (selector.index == 0 && selector.table == 0) return 0;
+	 if (selector.index == 0 && selector.table == 0) {
+		 logit(DPFLTR_INFO_LEVEL, "%s: NULL selector\n", __FUNCTION__);
+		 return 0;
+	 }
+
+	 logit(DPFLTR_INFO_LEVEL, "%s: selector.index: %x\n", __FUNCTION__, selector.index);
 
 	 descriptor_table = (struct __segment_descriptor_32_t*)gdt_base;
 	 descriptor = &descriptor_table[selector.index];
@@ -47,6 +56,7 @@ unsigned __int64 get_segment_base(unsigned __int64 gdt_base, unsigned __int16 ss
 		 descriptor_64 = (struct __segment_descriptor_64_t*) descriptor;
 		 segment_base |= ((unsigned __int64)descriptor_64->base_upper) << 32;
 	 }
+	 logit(DPFLTR_INFO_LEVEL, "%s: exit. segment_base: %x\n", __FUNCTION__, segment_base);
 	 return segment_base;
  }
 

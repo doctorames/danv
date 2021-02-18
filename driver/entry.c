@@ -26,13 +26,13 @@ DriverEntry(
 	UNREFERENCED_PARAMETER(DriverObject);
 	UNREFERENCED_PARAMETER(RegistryPath);
 
-	DbgPrint("hey its me!!");
-	DbgPrint("VMX is %s", VmHasVmxSupport() == 1u ? "SUPPORTED" : "NOT SUPPORTED");
+	DbgPrint("hey its me again!!\n");
+	DbgPrint("VMX is %s\n", VmHasVmxSupport() == 1u ? "SUPPORTED" : "NOT SUPPORTED");
 
-	logit(DPFLTR_ERROR_LEVEL, "%s", "DPFLTR_ERROR_LEVEL");
-	logit(DPFLTR_WARNING_LEVEL, "%s", "DPFLTR_WARNING_LEVEL");
-	logit(DPFLTR_TRACE_LEVEL, "%s", "DPFLTR_TRACE_LEVEL");
-	logit(DPFLTR_INFO_LEVEL, "%s", "DPFLTR_INFO_LEVEL");
+	logit(DPFLTR_ERROR_LEVEL, "%s", "DPFLTR_ERROR_LEVEL\n");
+	logit(DPFLTR_WARNING_LEVEL, "%s", "DPFLTR_WARNING_LEVEL\n");
+	logit(DPFLTR_TRACE_LEVEL, "%s", "DPFLTR_TRACE_LEVEL\n");
+	logit(DPFLTR_INFO_LEVEL, "%s", "DPFLTR_INFO_LEVEL\n");
 
 	enable_vmx_operation();
 	vmm_init();
@@ -42,12 +42,12 @@ DriverEntry(
 
 struct __vmm_context_t* allocate_vmm_context() {
 	struct __vmm_context_t *vmm = NULL;
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 	vmm = ExAllocatePoolWithTag(NonPagedPool, sizeof(struct __vmm_context_t), VMM_TAG);
 
 	if (vmm == NULL) {
 		// this is bad
-		logit(DPFLTR_ERROR_LEVEL, "%s: Failed to alloc memory for vmm context", __FUNCTION__);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Failed to alloc memory for vmm context\n", __FUNCTION__);
 		return NULL;
 	}
 
@@ -65,17 +65,17 @@ struct __vmm_context_t* allocate_vmm_context() {
 struct __vcpu_t* init_vcpu() {
 	struct __vcpu_t *vcpu = NULL;
 
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	vcpu = ExAllocatePoolWithTag(NonPagedPool, sizeof(struct __vcpu_t), VMM_TAG);
 	if (vcpu == NULL) {
 		// this is bad
-		logit(DPFLTR_ERROR_LEVEL, "%s: Failed to alloc memory for vcpu", __FUNCTION__);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Failed to alloc memory for vcpu\n", __FUNCTION__);
 		return NULL;
 	}
 
 	RtlSecureZeroMemory(vcpu, sizeof(struct __vcpu_t));
-	logit(DPFLTR_ERROR_LEVEL, "%s: vcpu:%p", __FUNCTION__, vcpu);
+	logit(DPFLTR_ERROR_LEVEL, "%s: vcpu:%p\n", __FUNCTION__, vcpu);
 
 	memset(vcpu->vmm_stack.limit, 0xcc, sizeof(vcpu->vmm_stack.limit));
 
@@ -87,7 +87,7 @@ struct __vcpu_t* init_vcpu() {
 }
 
 int vmm_init() {
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 	struct __vmm_context_t *vmm_context = allocate_vmm_context();
 	PROCESSOR_NUMBER procnum;
 	GROUP_AFFINITY affinity, old_affinity;
@@ -96,12 +96,12 @@ int vmm_init() {
 	//vmm_context = allocate_vmm_context();
 
 
-	logit(DPFLTR_INFO_LEVEL, "%s: vmm_context->processor_count: %d", __FUNCTION__, vmm_context->processor_count);
+	logit(DPFLTR_INFO_LEVEL, "%s: vmm_context->processor_count: %d\n", __FUNCTION__, vmm_context->processor_count);
 
 
 	for (unsigned i = 0; i < vmm_context->processor_count; i++) {
 		vmm_context->vcpu_table[i] = init_vcpu();
-		logit(DPFLTR_ERROR_LEVEL, "%s: vmm_context->vcpu_table[%d]:%p", __FUNCTION__, i, vmm_context->vcpu_table[i]);
+		logit(DPFLTR_ERROR_LEVEL, "%s: vmm_context->vcpu_table[%d]:%p\n", __FUNCTION__, i, vmm_context->vcpu_table[i]);
 		//vmm_context->vcpu_table[i]->vmm_stack.vmm_context = vmm_context;
 	}
 
@@ -125,7 +125,7 @@ int enable_vmx_operation() {
 	
 	union __cr4_t cr4 = { 0 };
 	union __ia32_feature_control_msr feature_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	// wait, where do we enforce IA32_VMX_CRx_FIXEDx?
 	// TODO: react to IA32_VMX_CRx_FIXEDx
@@ -148,7 +148,7 @@ int enable_vmx_operation() {
 
 unsigned int VmHasVmxSupport() {
 	union __cpuid_t cpuid = {0};
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	__cpuid(cpuid.cpu_info, 1);
 
@@ -168,7 +168,7 @@ static void adjust_allowed_bits(unsigned int cap_msr, unsigned __int32 *value) {
 
 	union __vmx_true_control_settings_t cap;
 
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	cap.all = __readmsr(cap_msr);
 
@@ -179,7 +179,7 @@ static void adjust_allowed_bits(unsigned int cap_msr, unsigned __int32 *value) {
 static void adjust_entry_controls(union __vmx_entry_control_t *entry_control) {
 	unsigned int capability_msr;
 	union __ia32_vmx_basic_msr basic_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 
@@ -190,7 +190,7 @@ static void adjust_entry_controls(union __vmx_entry_control_t *entry_control) {
 static void adjust_exit_controls(union __vmx_exit_control_t *exit_control) {
 	unsigned int capability_msr;
 	union __ia32_vmx_basic_msr basic_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 
@@ -201,7 +201,7 @@ static void adjust_exit_controls(union __vmx_exit_control_t *exit_control) {
 static void adjust_pinbased_controls(union __vmx_pinbased_control_t *pinbased_control) {
 	unsigned int capability_msr;
 	union __ia32_vmx_basic_msr basic_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 
@@ -212,7 +212,7 @@ static void adjust_pinbased_controls(union __vmx_pinbased_control_t *pinbased_co
 static void adjust_primary_procbased_controls(union __vmx_primary_processor_based_control_t *procbased_control) {
 	unsigned int capability_msr;
 	union __ia32_vmx_basic_msr basic_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 
@@ -223,7 +223,7 @@ static void adjust_primary_procbased_controls(union __vmx_primary_processor_base
 static void adjust_secondary_procbased_controls(union __vmx_secondary_processor_based_control_t *procbased_control) {
 	unsigned int capability_msr;
 	union __ia32_vmx_basic_msr basic_msr = { 0 };
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	basic_msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 
@@ -239,7 +239,7 @@ int init_vmxon(struct __vcpu_t *vcpu) {
 	
 	union __ia32_vmx_basic_msr msr = { 0 };
 	PHYSICAL_ADDRESS maxAddr;
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	if (vcpu == NULL) return 0;
 
@@ -273,7 +273,7 @@ int init_vmcs(struct __vmm_context_t *vmm_context, struct __vcpu_t *vcpu, void *
 	is_pt_allowed;
 	guest_rsp;
 
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	msr.control = __readmsr(IA32_VMX_BASIC_MSR);
 	maxAddr.QuadPart = ~0ULL;
@@ -287,12 +287,12 @@ int init_vmcs(struct __vmm_context_t *vmm_context, struct __vcpu_t *vcpu, void *
 	
 	// init the vmcs
 	if (__vmx_vmclear(&vcpu->vmcs_physical) != VMX_OK) {
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmclear() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmclear() instrinsic no worky for vcpu %d\n", __FUNCTION__, procNum);
 		return 0;
 	}
 
 	if (__vmx_vmptrld(&vcpu->vmcs_physical) != VMX_OK) {
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmptrld() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmptrld() instrinsic no worky for vcpu %d\n", __FUNCTION__, procNum);
 		return 0;
 	}
 
@@ -382,20 +382,33 @@ int init_vmcs(struct __vmm_context_t *vmm_context, struct __vcpu_t *vcpu, void *
 	// Set host things
 	// According to 3.26.2.3, you have to mask out the requested priviledge level bits [1:0] and table indicator [2] bit.
 	// So our mask will be the 1's compliment of these 3 low bits ~(7) = 0xfff8
+	logit(DPFLTR_INFO_LEVEL, "%s: 1\n", __FUNCTION__);
 	unsigned short selector_mask = 7u;
 	__vmx_vmwrite(HostEsSelector, __read_es() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 2\n", __FUNCTION__);
 	__vmx_vmwrite(HostCsSelector, __read_cs() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 3\n", __FUNCTION__);
 	__vmx_vmwrite(HostSsSelector, __read_ss() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 4\n", __FUNCTION__);
 	__vmx_vmwrite(HostDsSelector, __read_ds() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 5\n", __FUNCTION__);
 	__vmx_vmwrite(HostFsSelector, __read_fs() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 6\n", __FUNCTION__);
 	__vmx_vmwrite(HostGsSelector, __read_gs() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 7\n", __FUNCTION__);
 	__vmx_vmwrite(HostTrSelector, __read_tr() & ~selector_mask);
+	logit(DPFLTR_INFO_LEVEL, "%s: 8\n", __FUNCTION__);
 
 	__vmx_vmwrite(HostCr0, __readcr0());
+	logit(DPFLTR_INFO_LEVEL, "%s: 9\n", __FUNCTION__);
 	__vmx_vmwrite(HostCr3, __readcr3());
+	logit(DPFLTR_INFO_LEVEL, "%s: 10\n", __FUNCTION__);
 	__vmx_vmwrite(HostCr4, __readcr4());
+	logit(DPFLTR_INFO_LEVEL, "%s: 11\n", __FUNCTION__);
 	__vmx_vmwrite(HostRsp, &vcpu->vmm_stack.vmm_context);
+	logit(DPFLTR_INFO_LEVEL, "%s: 12\n", __FUNCTION__);
 	__vmx_vmwrite(HostRip, guest_entry_stub);
+	logit(DPFLTR_INFO_LEVEL, "%s: 13\n", __FUNCTION__);
 
 	__vmx_vmwrite(HostTrBase, get_segment_base(gdtr.base_address, __read_tr()));
 	__vmx_vmwrite(HostGdtrBase, gdtr.base_address);
@@ -411,7 +424,7 @@ int init_vmcs(struct __vmm_context_t *vmm_context, struct __vcpu_t *vcpu, void *
 }
 
 void adjust_control_registers() {
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 	union __cr0_t cr0 = { 0 };
 	union __cr4_t cr4 = { 0 };
 	union __ia32_vmx_cr_fixed_msr msr = { 0 };
@@ -434,7 +447,7 @@ void adjust_control_registers() {
 void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rsp) {
 	//union __ia32_vmx_misc_msr msr;
 	guest_rsp;
-	logit(DPFLTR_INFO_LEVEL, "%s: entry", __FUNCTION__);
+	logit(DPFLTR_INFO_LEVEL, "%s: entry\n", __FUNCTION__);
 
 	unsigned long procNum = KeGetCurrentProcessorNumber();
 
@@ -442,21 +455,21 @@ void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rsp) {
 
 	if (!VmHasVmxSupport()) {
 		// do something
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. No VMX support for vcpu %d", __FUNCTION__, procNum);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. No VMX support for vcpu %d\n", __FUNCTION__, procNum);
 		return;
 	}
 
-	logit(DPFLTR_ERROR_LEVEL, "%s: vmm->vcpu_table[%d]:%p", __FUNCTION__, procNum, vmm->vcpu_table[procNum]);
+	logit(DPFLTR_ERROR_LEVEL, "%s: vmm->vcpu_table[%d]:%p\n", __FUNCTION__, procNum, vmm->vcpu_table[procNum]);
 	if (!init_vmxon(vmm->vcpu_table[procNum])) {
 		// do something
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. init_vmxon() no worky for vcpu %d", __FUNCTION__, procNum);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. init_vmxon() no worky for vcpu %d\n", __FUNCTION__, procNum);
 		return;
 	}
 
 	// call the vmxon instrinsic
 	if (__vmx_on(&vmm->vcpu_table[procNum]->vmxon_physical) != 0) {
 		// do something
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_on() instrinsic no worky for vcpu %d", __FUNCTION__, procNum);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_on() instrinsic no worky for vcpu %d\n", __FUNCTION__, procNum);
 		return;
 	}
 
@@ -466,11 +479,11 @@ void init_logical_processor(struct __vmm_context_t *vmm, void *guest_rsp) {
 	if (status != 0) {
 		unsigned __int32 vmx_error;
 		__vmx_vmread(VmInstructionError, &vmx_error);
-		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmlaunch() instrinsic no worky for vcpu %d. VXM error: 0x%x", __FUNCTION__, procNum, vmx_error);
+		logit(DPFLTR_ERROR_LEVEL, "%s: Uh oh. __vmx_vmlaunch() instrinsic no worky for vcpu %d. VXM error: 0x%x\n", __FUNCTION__, procNum, vmx_error);
 		return;
 	}
 
-	logit(DPFLTR_INFO_LEVEL, "%s: SUCCESS! vcpu %d is in vmxon!", __FUNCTION__, procNum);
+	logit(DPFLTR_INFO_LEVEL, "%s: SUCCESS! vcpu %d is in vmxon!\n", __FUNCTION__, procNum);
 
 //_end:
 //	KeSignalCallDpcSynchronize();

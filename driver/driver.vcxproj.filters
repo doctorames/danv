@@ -44,9 +44,6 @@
     <ClInclude Include="arch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FieldEncoding.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="msr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,6 +51,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="asm_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interrupt_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="field_encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpuid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,7 +9,7 @@
 typedef  unsigned __int32 vmexit_status_t;
 #define VMEXIT_HANDLED  0
 #define VMEXIT_ERROR    1
-
+#define VMEXIT_YOUR_MOM 2
 
 
 
@@ -148,7 +148,7 @@ union __vmx_primary_processor_based_control_t {
 	unsigned __int32 all;
 	struct {
 		unsigned __int32
-			:2,
+			: 2,
 			interrupt_window_exiting : 1,
 			use_tsc_offsetting : 1,
 			: 3,
@@ -214,7 +214,7 @@ union __vmx_exit_control_t {
 	unsigned __int32 all;
 	struct {
 		unsigned __int32
-			:2,
+			: 2,
 			save_dbg_controls : 1,
 			: 6,
 			host_address_space_size : 1,
@@ -241,7 +241,7 @@ union __vmx_entry_control_t {
 	unsigned __int32 all;
 	struct {
 		unsigned __int32
-			:2,
+			: 2,
 			load_dbg_controls : 1,
 			: 6,
 			ia32e_mode_guest : 1,
@@ -343,5 +343,5 @@ struct __ext_registers_t {
 struct __gcpu_context_t {
 	void *vcpu;
 	struct __ext_registers_t ext_registers;
-	struct __guest_registers_t guest_registers;
+	struct __guest_registers_t *guest_registers;
 };
